@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#Arguments passed to the script
 person1=$1
 person2=$2
 
