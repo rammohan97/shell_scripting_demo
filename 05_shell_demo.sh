@@ -1,4 +1,4 @@
 #!/bin/bash
 
-echo "Course names is : ${COURSE_NAME}"
+echo "Course names is : $COURSE"
 
