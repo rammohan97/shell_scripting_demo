@@ -30,9 +30,8 @@ dnf install nginx -y
 echo "Installation complete."
 VALIDATE $? "Nginx"
 
-#### Installing MongoDB
-echo "Installing MongoDB..."
-dnf install mongodb-mongosh -y
+#### Installing python
+echo "Installing python..."
+dnf install python3 -y
 echo "Installation complete."
-VALIDATE $? "MongoDB"
-
+VALIDATE $? "Python"
