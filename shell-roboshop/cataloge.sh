@@ -32,7 +32,7 @@ fi
 
 # Getting mongodb PrivateIP address and updating it in catalogue.service
 MONGODB_HOST=$(/usr/local/bin/aws ec2 describe-instances --filters "Name=tag:Name,Values=mongodb" --query "Reservations[*].Instances[*].PrivateIpAddress" --output text)
-echo $MONGODB_HOST
+echo "$MONGODB_HOST"
 sed -i "s|mongodb://.*:27017|mongodb://$MONGODB_HOST:27017|g" catalogue.service
 VALIDATE $? "Updating mongodb PrivateIP address in catalogue service file"
 
