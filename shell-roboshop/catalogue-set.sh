@@ -40,11 +40,9 @@ MONGODB_HOST=$(/usr/local/bin/aws ec2 describe-instances \
 --query 'Reservations[*].Instances[*].PrivateIpAddress' \
 --output text)
  
-echo "MongoDB IP: $MONGODB_HOST"
- 
 # Update service file
 sed -i "s|mongodb://.*:27017|mongodb://$MONGODB_HOST:27017|g" catalogue.service
-
+VALIDATE $? "Updated mongodb private IP address in catalogue service file"
 
 # Disabling Current module
 dnf module disable nodejs -y &>>$LOG_FILE 
