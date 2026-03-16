@@ -39,7 +39,7 @@ CATALOGUE_HOST=$(/usr/local/bin/aws ec2 describe-instances \
 echo "Catalogue IP: $CATALOGUE_HOST"
  
 # Update service file
-sed -i "s|http://.*:8080/|http://$CATALOGUE_HOST:8080/|g" nginx.conf
+sed -i "/location \/api\/catalogue/ s|http://.*:8080|http://$CATALOGUE_HOST:8080|g" nginx.conf
 
 
 # Disabling Current Nginx module
