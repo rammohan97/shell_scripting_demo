@@ -39,7 +39,7 @@ CATALOGUE_HOST=$(/usr/local/bin/aws ec2 describe-instances \
 echo "Catalogue IP: $CATALOGUE_HOST"
  
 # Update service file
-sed -i "s|<CATALOGUE-SERVER-IP>|$CATALOGUE_HOST|g" cart.service
+sed -i "s|Environment=CATALOGUE_HOST=.*|Environment=CATALOGUE_HOST=$CATALOGUE_HOST|" cart.service
 
 # Getting redis PrivateIP address and updating it in cart.service
 REDIS_HOST=$(/usr/local/bin/aws ec2 describe-instances \
@@ -50,7 +50,7 @@ REDIS_HOST=$(/usr/local/bin/aws ec2 describe-instances \
 echo "RedIS IP: $REDIS_HOST"
 
 # Update service file
-sed -i "s|<REDIS-SERVER-IP>|$REDIS_HOST|g" cart.service
+sed -i "s|Environment=REDIS_HOST=.*|Environment=REDIS_HOST=$REDIS_HOST|" cart.service
 
 # Disabling Current module
 dnf module disable nodejs -y &>>$LOG_FILE 
