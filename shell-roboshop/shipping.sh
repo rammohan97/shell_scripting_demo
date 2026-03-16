@@ -99,8 +99,9 @@ VALIDATE $? "Enable cart"
 dnf install mysql -y &>>$LOG_FILE
 VALIDATE $? "Installing MySQL"
 
-mysql -h $MYSQL_HOST -uroot -pRoboShop@1 -e 'use cities' &>>$LOG_FILE
+mysql -h $MYSQL_HOST -uroot -pRoboShop@1 -e "show databases" | grep cities &>>$LOG_FILE
 if [ $? -ne 0 ]; then
+   echo "Schema not found.. loading schema"
    mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/schema.sql &>>$LOG_FILE
    mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/app-user.sql &>>$LOG_FILE
    mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/master-data.sql &>>$LOG_FILE
