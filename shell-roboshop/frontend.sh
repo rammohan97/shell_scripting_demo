@@ -74,6 +74,17 @@ echo "ShippingIP: $SHIPPING_HOST"
 # Update service file
 sed -i "/location \/api\/shipping/ s|http://.*:8080|http://$SHIPPING_HOST:8080|g" nginx.conf
 
+# Getting PAyment PrivateIP address and updating it in nginx.conf
+PAYMENT_HOST=$(/usr/local/bin/aws ec2 describe-instances \
+--filters "Name=tag:Name,Values=payment" \
+--query 'Reservations[*].Instances[*].PrivateIpAddress' \
+--output text)
+ 
+echo "PaymentIP: $PAYMENT_HOST"
+
+# Update service file
+sed -i "/location \/api\/payment/ s|http://.*:8080|http://$PAYMENT_HOST:8080|g" nginx.conf
+
 # Disabling Current Nginx module
 dnf module disable nginx -y &>>$LOG_FILE 
 VALIDATE $? "Disabling Nginx"
