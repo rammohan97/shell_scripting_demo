@@ -50,7 +50,7 @@ REDIS_HOST=$(/usr/local/bin/aws ec2 describe-instances \
 echo "RedIS IP: $REDIS_HOST"
 
 # Update service file
-sed -i "s|redis://.*:6379|redis://$REDIS_HOST_HOST:6379|g" user.service
+sed -i "s|redis://.*:6379|redis://$REDIS_HOST:6379|g" user.service
 
 # Disabling Current module
 dnf module disable nodejs -y &>>$LOG_FILE 
