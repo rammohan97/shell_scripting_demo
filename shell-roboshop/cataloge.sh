@@ -31,7 +31,7 @@ fi
 }
 
 # Getting mongodb PrivateIP address and updating it in catalogue.service
-MONGODB_HOST=$(/usr/bin/aws ec2 describe-instances --filters "Name=tag:Name,Values=mongodb" --query "Reservations[*].Instances[*].PrivateIpAddress" --output text)
+MONGODB_HOST=$(/usr/local/bin/aws ec2 describe-instances --filters "Name=tag:Name,Values=mongodb" --query "Reservations[*].Instances[*].PrivateIpAddress" --output text)
 
 sed -i "s/<MONGODB-SERVER-IPADDRESS>/$MONGODB_HOST/g" catalogue.service
 VALIDATE $? "Updating mongodb PrivateIP address in catalogue service file"
