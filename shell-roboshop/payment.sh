@@ -30,7 +30,7 @@ else
 fi
 }
 
-# Getting Cart PrivateIP address and updating it in shipping.service
+# Getting Cart PrivateIP address and updating it in payment.service
 CART_HOST=$(/usr/local/bin/aws ec2 describe-instances \
 --filters "Name=tag:Name,Values=cart" \
 --query 'Reservations[*].Instances[*].PrivateIpAddress' \
@@ -39,23 +39,33 @@ CART_HOST=$(/usr/local/bin/aws ec2 describe-instances \
 echo "CartIP: $CART_HOST"
 
 # Update service file
-sed -i "s|Environment=CART_ENDPOINT=.*:8080|Environment=CART_ENDPOINT=$CART_HOST|" shipping.service
+sed -i "s|Environment=CART_HOST=.*|Environment=CART_HOST=$CART_HOST|" payment.service
 
-# Getting MySQL PrivateIP address and updating it in shipping.service
-MYSQL_HOST=$(/usr/local/bin/aws ec2 describe-instances \
---filters "Name=tag:Name,Values=mysql" \
+# Getting User PrivateIP address and updating it in payment.service
+USER_HOST=$(/usr/local/bin/aws ec2 describe-instances \
+--filters "Name=tag:Name,Values=user" \
 --query 'Reservations[*].Instances[*].PrivateIpAddress' \
 --output text)
  
-echo "MySQLIP: $MYSQL_HOST"
+echo "USER_IP: $USER_HOST"
 
 # Update service file
-sed -i "s|Environment=DB_HOST=.*|Environment=DB_HOST=$MYSQL_HOST|" shipping.service
+sed -i "s|Environment=USER_HOST=.*|Environment=USER_HOST=$USER_HOST|" payment.service
 
+# Getting Rabbitmq PrivateIP address and updating it in payment.service
+RABBITMQ_HOST=$(/usr/local/bin/aws ec2 describe-instances \
+--filters "Name=tag:Name,Values=rabbitmq" \
+--query 'Reservations[*].Instances[*].PrivateIpAddress' \
+--output text)
+ 
+echo "RABBITMQ_IP: $RABBITMQ_HOST"
 
-# Installing Maven
-dnf install maven -y
-VALIDATE $? "Installing Maven"
+# Update service file
+sed -i "s|Environment=AMQP_HOST=.*|Environment=AMQP_HOST=$RABBITMQ_HOST|" payment.service
+
+# Installing python3
+dnf install python3 gcc python3-devel -y &>>$LOG_FILE
+VALIDATE $? "Installing Python3"
 
 # Add application user
 id roboshop &>>$LOG_FILE
@@ -70,43 +80,29 @@ fi
 mkdir -p /app
 VALIDATE $? "Creating app directory"
 
-curl -L -o /tmp/shipping.zip https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip &>>$LOG_FILE 
-VALIDATE $? "Dowloading Shipping application"
+curl -L -o /tmp/payment.zip https://roboshop-artifacts.s3.amazonaws.com/payment-v3.zip &>>$LOG_FILE 
+VALIDATE $? "Dowloading payment application"
 
 cd /app
 VALIDATE $? "Changing to app directory"
 
 rm -rf /app/*
 VALIDATE $? "Removing Existing Code"
-unzip /tmp/shipping.zip &>>$LOG_FILE 
-VALIDATE $? "Unzip shipping"
+unzip /tmp/payment.zip &>>$LOG_FILE 
+VALIDATE $? "Unzip payment"
 
-# Build the application
-mvn clean package &>>$LOG_FILE
-VALIDATE $? "Build Success"
-mv target/shipping-1.0.jar shipping.jar
-VALIDATE $? "Created JAR"
+# Downloading Dependencies
+pip3 install -r requirements.txt &>>$LOG_FILE
+VALIDATE $? "Downloaded Dependencies"
 
-cp $SCRIPT_PATH/shipping.service /etc/systemd/system/shipping.service &>>$LOG_FILE
+cp $SCRIPT_PATH/payment.service /etc/systemd/system/payment.service &>>$LOG_FILE
 VALIDATE $? "Copy systemctl services"
 
 # Daemon-reload
 systemctl daemon-reload 
-systemctl enable shipping &>>$LOG_FILE
-VALIDATE $? "Enable cart"
-
-# Installing MySQL
-dnf install mysql -y &>>$LOG_FILE
-VALIDATE $? "Installing MySQL"
-
-mysql -h $MYSQL_HOST -uroot -pRoboShop@1 -e 'use cities' &>>$LOG_FILE
-if [ $? -ne 0 ]; then
-   mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/schema.sql &>>$LOG_FILE
-   mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/app-user.sql &>>$LOG_FILE
-   mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/master-data.sql &>>$LOG_FILE
-else
-   echo -e "Shipping data is already loaded.. $YELLOW Skipping $RESET"
+systemctl enable payment &>>$LOG_FILE
+VALIDATE $? "Enable payment"
 
 # Re-starting services
 systemctl restart shipping &>>$LOG_FILE
-VALIDATE $? "Restrted Shipping"
+VALIDATE $? "Restrted payment"
