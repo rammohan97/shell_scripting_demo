@@ -8,7 +8,7 @@ RESET="\e[0m"
 LOGS_DIR="/var/log/shell-roboshop"
 SCRIPT_NAME=$( echo $0 | cut -d "." -f1 )
 LOG_FILE="$LOGS_DIR/${SCRIPT_NAME}.log"
-SCRIPT_PATH=$pwd
+SCRIPT_PATH=$PWD
 USERID=$(id -u)
 
 mkdir -p $LOGS_DIR
