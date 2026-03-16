@@ -82,9 +82,31 @@ unzip /tmp/shipping.zip &>>$LOG_FILE
 VALIDATE $? "Unzip shipping"
 
 # Build the application
-mvn clean package
+mvn clean package &>>$LOG_FILE
+VALIDATE $? "Build Success"
 mv target/shipping-1.0.jar shipping.jar
+VALIDATE $? "Created JAR"
 
-cp $SCRIPT_PATH/shipping.service /etc/systemd/system/shipping.service
-systemctl daemon-reload
-systemctl enable shipping
+cp $SCRIPT_PATH/shipping.service /etc/systemd/system/shipping.service &>>$LOG_FILE
+VALIDATE $? "Copy systemctl services"
+
+# Daemon-reload
+systemctl daemon-reload 
+systemctl enable shipping &>>$LOG_FILE
+VALIDATE $? "Enable cart"
+
+# Installing MySQL
+dnf install mysql -y &>>$LOG_FILE
+VALIDATE $? "Installing MySQL"
+
+mysql -h $MYSQL_HOST -uroot -pRoboShop@1 -e 'use cities'
+if [ $? -ne 0 ]; then
+   mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/schema.sql &>>$LOG_FILE
+   mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/app-user.sql &>>$LOG_FILE
+   mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/master-data.sql &>>$LOG_FILE
+else
+   echo -e "Shipping data is already loaded.. $YELLOW Skipping $RESET"
+
+# Re-starting services
+systemctl restart shipping &>>$LOG_FILE
+VALIDATE $? "Restrted Shipping"
