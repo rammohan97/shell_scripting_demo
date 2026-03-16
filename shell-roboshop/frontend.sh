@@ -30,7 +30,7 @@ else
 fi
 }
 
-# Getting mongodb PrivateIP address and updating it in catalogue.service
+# Getting catalogue PrivateIP address and updating it in nginx.conf
 CATALOGUE_HOST=$(/usr/local/bin/aws ec2 describe-instances \
 --filters "Name=tag:Name,Values=catalogue" \
 --query 'Reservations[*].Instances[*].PrivateIpAddress' \
@@ -40,6 +40,17 @@ echo "Catalogue IP: $CATALOGUE_HOST"
  
 # Update service file
 sed -i "/location \/api\/catalogue/ s|http://.*:8080|http://$CATALOGUE_HOST:8080|g" nginx.conf
+
+# Getting User PrivateIP address and updating it in nginx.conf
+USER_HOST=$(/usr/local/bin/aws ec2 describe-instances \
+--filters "Name=tag:Name,Values=user" \
+--query 'Reservations[*].Instances[*].PrivateIpAddress' \
+--output text)
+ 
+echo "User IP: $USER_HOST"
+ 
+# Update service file
+sed -i "/location \/api\/user/ s|http://.*:8080|http://$USER_HOST:8080|g" nginx.conf
 
 
 # Disabling Current Nginx module
