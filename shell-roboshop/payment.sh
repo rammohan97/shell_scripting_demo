@@ -104,5 +104,5 @@ systemctl enable payment &>>$LOG_FILE
 VALIDATE $? "Enable payment"
 
 # Re-starting services
-systemctl restart shipping &>>$LOG_FILE
+systemctl restart payment &>>$LOG_FILE
 VALIDATE $? "Restrted payment"
