@@ -52,6 +52,27 @@ echo "User IP: $USER_HOST"
 # Update service file
 sed -i "/location \/api\/user/ s|http://.*:8080|http://$USER_HOST:8080|g" nginx.conf
 
+# Getting Cart PrivateIP address and updating it in nginx.conf
+CART_HOST=$(/usr/local/bin/aws ec2 describe-instances \
+--filters "Name=tag:Name,Values=cart" \
+--query 'Reservations[*].Instances[*].PrivateIpAddress' \
+--output text)
+ 
+echo "CartIP: $CART_HOST"
+
+# Update service file
+sed -i "/location \/api\/cart/ s|http://.*:8080|http://$CART_HOST:8080|g" nginx.conf
+
+# Getting Shipping PrivateIP address and updating it in nginx.conf
+SHIPPING_HOST=$(/usr/local/bin/aws ec2 describe-instances \
+--filters "Name=tag:Name,Values=shipping" \
+--query 'Reservations[*].Instances[*].PrivateIpAddress' \
+--output text)
+ 
+echo "ShippingIP: $SHIPPING_HOST"
+
+# Update service file
+sed -i "/location \/api\/shipping/ s|http://.*:8080|http://$SHIPPING_HOST:8080|g" nginx.conf
 
 # Disabling Current Nginx module
 dnf module disable nginx -y &>>$LOG_FILE 
