@@ -94,6 +94,8 @@ VALIDATE $? "Copy systemctl services"
 systemctl daemon-reload 
 systemctl enable shipping &>>$LOG_FILE
 VALIDATE $? "Enable cart"
+systemctl start shipping &>>$LOG_FILE
+VALIDATE $? "Starting Shipping"
 
 # Installing MySQL
 dnf install mysql -y &>>$LOG_FILE
