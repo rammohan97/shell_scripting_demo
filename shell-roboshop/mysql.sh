@@ -30,15 +30,15 @@ fi
 }
 
 # Installing mysql server
-dnf install mysql-server -y
+dnf install mysql-server -y &>>$LOG_FILE
 VALIDATE $? "Installing mysql server"
 
 # Start MySQL services
-systemctl enable mysqld
+systemctl enable mysqld &>>$LOG_FILE
 VALIDATE $? "Enabling MySQL server"
-systemctl start mysqld
+systemctl start mysqld &>>$LOG_FILE
 VALIDATE $? "Start MySQL server"
 
 # Setting the password
-mysql_secure_installation --set-root-pass RoboShop@1
+mysql_secure_installation --set-root-pass RoboShop@1 &>>$LOG_FILE
 VALIDATE $? "Setting the password"
