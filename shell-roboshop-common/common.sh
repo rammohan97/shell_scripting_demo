@@ -55,6 +55,22 @@ Install_NodeJS(){
     VALIDATE $? "Install Dependencies"
 }
 
+# Installing Redis
+Installing_Redis(){
+
+    # Disable module redis
+    dnf module disable redis -y &>>$LOG_FILE
+    VALIDATE $? "Disabling default module redis"
+
+    # Enabling redis
+    dnf module enable redis -y &>>$LOG_FILE
+    VALIDATE $? "Enabling redis"
+
+    # Install redis
+    dnf install redis -y &>>$LOG_FILE
+    VALIDATE $? "Installing redis"
+}
+
 # App Set up
 App_Setup(){
     mkdir -p /app
