@@ -43,7 +43,7 @@ Mongodb_PrivateIp(){
     sed -i "s|mongodb://.*:27017|mongodb://$MONGODB_HOST:27017|g" $app_name.service
 }
 
-# Getting redis PrivateIP address and updating it in user.service
+# Getting redis PrivateIP address and updating it in service file
 Redis_PrivateIp(){
     REDIS_HOST=$(/usr/local/bin/aws ec2 describe-instances \
     --filters "Name=tag:Name,Values=redis" \
@@ -54,6 +54,32 @@ Redis_PrivateIp(){
 
     # Update service file
     sed -i "s|redis://.*:6379|redis://$REDIS_HOST:6379|g" $app_name.service
+}
+
+# Getting Cart PrivateIP address and updating it in service file
+Cart_PrivateIp(){
+    CART_HOST=$(/usr/local/bin/aws ec2 describe-instances \
+    --filters "Name=tag:Name,Values=cart" \
+    --query 'Reservations[*].Instances[*].PrivateIpAddress' \
+    --output text)
+    
+    echo "CartIP: $CART_HOST"
+
+    # Update service file
+    sed -i "s|Environment=CART_ENDPOINT=.*|Environment=CART_ENDPOINT=${CART_HOST}:8080|g" $app_name.service
+}
+
+# Getting MySQL PrivateIP address and updating it in service file
+MySQL_PrivateIp(){
+    MYSQL_HOST=$(/usr/local/bin/aws ec2 describe-instances \
+    --filters "Name=tag:Name,Values=mysql" \
+    --query 'Reservations[*].Instances[*].PrivateIpAddress' \
+    --output text)
+    
+    echo "MySQLIP: $MYSQL_HOST"
+
+    # Update service file
+    sed -i "s|Environment=DB_HOST=.*|Environment=DB_HOST=$MYSQL_HOST|" shipping.service
 }
 
 # Installing NodeJS
@@ -82,6 +108,16 @@ Installing_Redis(){
     # Install redis
     dnf install redis -y &>>$LOG_FILE
     VALIDATE $? "Installing redis"
+}
+
+# Installing Maven
+Installing_Maven(){
+    dnf install maven -y
+    VALIDATE $? "Installing Maven"
+    mvn clean package &>>$LOG_FILE
+    VALIDATE $? "Build Success"
+    mv target/$app_name-1.0.jar $app_name.jar
+    VALIDATE $? "Created JAR"
 }
 
 # App Set up
