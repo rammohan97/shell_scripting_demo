@@ -30,7 +30,7 @@ else
 fi
 }
 
-# Getting mongodb PrivateIP address and updating it in catalogue.service
+# Getting Catalogue PrivateIP address and updating it in catalogue.service
 CATALOGUE_HOST=$(/usr/local/bin/aws ec2 describe-instances \
 --filters "Name=tag:Name,Values=catalogue" \
 --query 'Reservations[*].Instances[*].PrivateIpAddress' \

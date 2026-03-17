@@ -54,6 +54,9 @@ Redis_PrivateIp(){
 
     # Update service file
     sed -i "s|redis://.*:6379|redis://$REDIS_HOST:6379|g" $app_name.service
+    
+    # Update in cart.service
+    sed -i "s|Environment=REDIS_HOST=.*|Environment=REDIS_HOST=$REDIS_HOST|" cart.service
 }
 
 # Getting Cart PrivateIP address and updating it in service file
@@ -80,6 +83,20 @@ MySQL_PrivateIp(){
 
     # Update service file
     sed -i "s|Environment=DB_HOST=.*|Environment=DB_HOST=$MYSQL_HOST|" shipping.service
+}
+
+# Getting catalouge PrivateIP address and updating it in service file
+Catalogue_PrivateIp(){
+    CATALOGUE_HOST=$(/usr/local/bin/aws ec2 describe-instances \
+    --filters "Name=tag:Name,Values=catalogue" \
+    --query 'Reservations[*].Instances[*].PrivateIpAddress' \
+    --output text)
+    
+    echo "Catalogue IP: $CATALOGUE_HOST"
+    
+    # Update service file
+    sed -i "s|Environment=CATALOGUE_HOST=.*|Environment=CATALOGUE_HOST=$CATALOGUE_HOST|" $app_name.service
+
 }
 
 # Installing NodeJS
