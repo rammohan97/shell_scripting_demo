@@ -72,6 +72,8 @@ Cart_PrivateIp(){
     sed -i "s|Environment=CART_ENDPOINT=.*|Environment=CART_ENDPOINT=${CART_HOST}:8080|g" $app_name.service
 
     sed -i "s|Environment=CART_HOST=.*|Environment=CART_HOST=$CART_HOST|" $app_name.service
+
+    sed -i "/location \/api\/cart/ s|http://.*:8080|http://$CART_HOST:8080|g" nginx.conf
 }
 
 # Getting MySQL PrivateIP address and updating it in service file
@@ -98,6 +100,8 @@ Catalogue_PrivateIp(){
     
     # Update service file
     sed -i "s|Environment=CATALOGUE_HOST=.*|Environment=CATALOGUE_HOST=$CATALOGUE_HOST|" $app_name.service
+
+    sed -i "/location \/api\/catalogue/ s|http://.*:8080|http://$CATALOGUE_HOST:8080|g" nginx.conf
 }
 
 # Getting User PrivateIp address and updating it in service file
@@ -111,9 +115,11 @@ User_PrivateIp(){
 
     # Update service file
     sed -i "s|Environment=USER_HOST=.*|Environment=USER_HOST=$USER_HOST|" $app_name.service
+
+    sed -i "/location \/api\/user/ s|http://.*:8080|http://$USER_HOST:8080|g" nginx.conf
 }
 
-# Getting User Rabbitmq address and updating it in service file
+# Getting Rabbitmq address and updating it in service file
 Rabbitmq_PrivateIp(){
     RABBITMQ_HOST=$(/usr/local/bin/aws ec2 describe-instances \
     --filters "Name=tag:Name,Values=rabbitmq" \
@@ -126,6 +132,31 @@ Rabbitmq_PrivateIp(){
     sed -i "s|Environment=AMQP_HOST=.*|Environment=AMQP_HOST=$RABBITMQ_HOST|" $app_name.service
 }
 
+# Getting Shipping IP address and updating it in nginx file
+Shipping_PrivateIp(){
+    SHIPPING_HOST=$(/usr/local/bin/aws ec2 describe-instances \
+    --filters "Name=tag:Name,Values=shipping" \
+    --query 'Reservations[*].Instances[*].PrivateIpAddress' \
+    --output text)
+    
+    echo "ShippingIP: $SHIPPING_HOST"
+
+    # Update service file
+    sed -i "/location \/api\/shipping/ s|http://.*:8080|http://$SHIPPING_HOST:8080|g" nginx.conf
+}
+
+# Getting PAyment PrivateIP address and updating it in nginx.conf
+Payment_PrivateIp(){
+    PAYMENT_HOST=$(/usr/local/bin/aws ec2 describe-instances \
+    --filters "Name=tag:Name,Values=payment" \
+    --query 'Reservations[*].Instances[*].PrivateIpAddress' \
+    --output text)
+    
+    echo "PaymentIP: $PAYMENT_HOST"
+
+    # Update service file
+    sed -i "/location \/api\/payment/ s|http://.*:8080|http://$PAYMENT_HOST:8080|g" nginx.conf
+}
 
 # Installing NodeJS
 Install_NodeJS(){
