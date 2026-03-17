@@ -137,6 +137,16 @@ Installing_Maven(){
     VALIDATE $? "Created JAR"
 }
 
+# Installing MySQL Server
+Installing_MySQL(){
+    dnf install mysql-server -y &>>$LOG_FILE
+    VALIDATE $? "Installing $app_name server"
+    systemctl enable mysqld &>>$LOG_FILE
+    VALIDATE $? "Enabling $app_name server"
+    systemctl start mysqld &>>$LOG_FILE
+    VALIDATE $? "Start $app_name server"
+}
+
 # App Set up
 App_Setup(){
     mkdir -p /app
