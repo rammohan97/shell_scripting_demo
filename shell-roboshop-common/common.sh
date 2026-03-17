@@ -43,22 +43,33 @@ Mongodb_PrivateIp(){
     sed -i "s|mongodb://.*:27017|mongodb://$MONGODB_HOST:27017|g" catalogue.service
 }
 
-# Disabling Current module
-Current_Module(){
+# Installing NodeJS
+Install_NodeJS(){
     dnf module disable nodejs -y &>>$LOG_FILE 
     VALIDATE $? "Disabling NodeJS"
-}
-
-# Enable required module
-Required_Module(){
     dnf module enable nodejs:20 -y&>>$LOG_FILE 
     VALIDATE $? "Enabling NodeJS 20"
-}
-
-# Install NodeJS
-Install_NodeJS(){
     dnf install nodejs -y&>>$LOG_FILE
     VALIDATE $? "Installing NodeJS"
+    npm install &>>$LOG_FILE 
+    VALIDATE $? "Install Dependencies"
+}
+
+# App Set up
+App_Setup(){
+    mkdir -p /app
+    VALIDATE $? "Creating app directory"
+
+    curl -o /tmp/$app_name.zip https://roboshop-artifacts.s3.amazonaws.com/$app_name-v3.zip &>>$LOG_FILE 
+    VALIDATE $? "Dowloading $app_name application"
+
+    cd /app
+    VALIDATE $? "Changing to app directory"
+
+    rm -rf /app/*
+    VALIDATE $? "Removing Existing Code"
+    unzip /tmp/$app_name.zip &>>$LOG_FILE 
+    VALIDATE $? "Unzip $app_name"
 }
 
 # Add application user
@@ -71,4 +82,15 @@ Application_User(){
         echo -e "User already exists! $YELLOW Skipping $RESET"
 
     fi
+}
+
+# Systemd setup
+Systemd_Setup(){
+
+    cp $SCRIPT_PATH/$app_name.service /etc/systemd/system/$app_name.service
+    VALIDATE $? "Copy systemctl services"
+
+    systemctl daemon-reload
+    systemctl enable $app_name &>>$LOG_FILE  
+    VALIDATE $? "Enable $app_name"
 }
