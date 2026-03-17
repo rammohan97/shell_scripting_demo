@@ -39,7 +39,7 @@ CART_HOST=$(/usr/local/bin/aws ec2 describe-instances \
 echo "CartIP: $CART_HOST"
 
 # Update service file
-sed -i "s|Environment=CART_ENDPOINT=.*:8080|Environment=CART_ENDPOINT=$CART_HOST:8080|g" shipping.service
+sed -i "s|Environment=CART_ENDPOINT=.*|Environment=CART_ENDPOINT=${CART_HOST}:8080|g" shipping.service
 
 # Getting MySQL PrivateIP address and updating it in shipping.service
 MYSQL_HOST=$(/usr/local/bin/aws ec2 describe-instances \
