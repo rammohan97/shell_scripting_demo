@@ -70,6 +70,8 @@ Cart_PrivateIp(){
 
     # Update service file
     sed -i "s|Environment=CART_ENDPOINT=.*|Environment=CART_ENDPOINT=${CART_HOST}:8080|g" $app_name.service
+
+    sed -i "s|Environment=CART_HOST=.*|Environment=CART_HOST=$CART_HOST|" $app_name.service
 }
 
 # Getting MySQL PrivateIP address and updating it in service file
@@ -82,7 +84,7 @@ MySQL_PrivateIp(){
     echo "MySQLIP: $MYSQL_HOST"
 
     # Update service file
-    sed -i "s|Environment=DB_HOST=.*|Environment=DB_HOST=$MYSQL_HOST|" shipping.service
+    sed -i "s|Environment=DB_HOST=.*|Environment=DB_HOST=$MYSQL_HOST|" $app_name.service
 }
 
 # Getting catalouge PrivateIP address and updating it in service file
@@ -96,8 +98,34 @@ Catalogue_PrivateIp(){
     
     # Update service file
     sed -i "s|Environment=CATALOGUE_HOST=.*|Environment=CATALOGUE_HOST=$CATALOGUE_HOST|" $app_name.service
-
 }
+
+# Getting User PrivateIp address and updating it in service file
+User_PrivateIp(){
+    USER_HOST=$(/usr/local/bin/aws ec2 describe-instances \
+    --filters "Name=tag:Name,Values=user" \
+    --query 'Reservations[*].Instances[*].PrivateIpAddress' \
+    --output text)
+    
+    echo "USER_IP: $USER_HOST"
+
+    # Update service file
+    sed -i "s|Environment=USER_HOST=.*|Environment=USER_HOST=$USER_HOST|" $app_name.service
+}
+
+# Getting User Rabbitmq address and updating it in service file
+Rabbitmq_PrivateIp(){
+    RABBITMQ_HOST=$(/usr/local/bin/aws ec2 describe-instances \
+    --filters "Name=tag:Name,Values=rabbitmq" \
+    --query 'Reservations[*].Instances[*].PrivateIpAddress' \
+    --output text)
+    
+    echo "RABBITMQ_IP: $RABBITMQ_HOST"
+
+    # Update service file
+    sed -i "s|Environment=AMQP_HOST=.*|Environment=AMQP_HOST=$RABBITMQ_HOST|" $app_name.service
+}
+
 
 # Installing NodeJS
 Install_NodeJS(){
@@ -155,6 +183,14 @@ Installing_Rabbitmq(){
     VALIDATE $? "Enabling $app_name"
     systemctl start rabbitmq-server &>>$LOG_FILE
     VALIDATE $? "Starting $app_name"
+}
+
+# Installing Python
+Installing_Python(){
+    dnf install python3 gcc python3-devel -y &>>$LOG_FILE
+    VALIDATE $? "Installing Python3"
+    pip3 install -r requirements.txt &>>$LOG_FILE
+    VALIDATE $? "Downloaded Dependencies"
 }
 
 # App Set up
