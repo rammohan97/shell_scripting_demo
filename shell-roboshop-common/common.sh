@@ -94,3 +94,10 @@ Systemd_Setup(){
     systemctl enable $app_name &>>$LOG_FILE  
     VALIDATE $? "Enable $app_name"
 }
+
+# Restart App
+Restart_App(){
+
+    systemctl restart $app_name
+    VALIDATE $? "Restarted $app_name"
+}

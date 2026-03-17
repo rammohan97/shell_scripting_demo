@@ -35,11 +35,10 @@ INDEX=$(mongosh $MONGODB_HOST --quiet --eval "db.getMongo().getDBNames().indexOf
 if [ $INDEX -le 0 ]; then
 # Load Master Data
     mongosh --host $MONGODB_HOST </app/db/master-data.js &>>$LOG_FILE 
-    VALIDATE $? "Load Catalogue products"
+    VALIDATE $? "Load $app_name products"
 else
-    echo -e "Catalogue products already loaded!!$YELLOW Skipping $RESET"
+    echo -e "$app_name products already loaded!! $YELLOW Skipping $RESET"
 fi
 
 # Re-start catalogue services
-systemctl restart $app_name
-VALIDATE $? "Restarted $app_name"
+Restart_App
