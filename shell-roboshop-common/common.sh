@@ -40,7 +40,7 @@ Mongodb_PrivateIp(){
     echo "MongoDB IP: $MONGODB_HOST"
 
     # Update service file
-    sed -i "s|mongodb://.*:27017|mongodb://$MONGODB_HOST:27017|g" catalogue.service
+    sed -i "s|mongodb://.*:27017|mongodb://$MONGODB_HOST:27017|g" $app_name.service
 }
 
 # Getting redis PrivateIP address and updating it in user.service
@@ -53,7 +53,7 @@ Redis_PrivateIp(){
     echo "RedIS IP: $REDIS_HOST"
 
     # Update service file
-    sed -i "s|redis://.*:6379|redis://$REDIS_HOST:6379|g" user.service
+    sed -i "s|redis://.*:6379|redis://$REDIS_HOST:6379|g" $app_name.service
 }
 
 # Installing NodeJS
