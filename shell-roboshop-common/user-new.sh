@@ -10,11 +10,11 @@ Mongodb_PrivateIp
 
 Redis_PrivateIp
 
+App_Setup
+
 Install_NodeJS
 
 Application_User
-
-App_Setup
 
 Systemd_Setup
 
