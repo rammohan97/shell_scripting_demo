@@ -147,6 +147,16 @@ Installing_MySQL(){
     VALIDATE $? "Start $app_name server"
 }
 
+# Installing Rabbitmq
+Installing_Rabbitmq(){
+    dnf install rabbitmq-server -y &>>$LOG_FILE
+    VALIDATE $? "Installing $app_name"
+    systemctl enable rabbitmq-server &>>$LOG_FILE
+    VALIDATE $? "Enabling $app_name"
+    systemctl start rabbitmq-server &>>$LOG_FILE
+    VALIDATE $? "Starting $app_name"
+}
+
 # App Set up
 App_Setup(){
     mkdir -p /app
